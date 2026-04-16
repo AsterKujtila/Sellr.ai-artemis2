@@ -45,21 +45,23 @@ export default function Chat({ name }: { name: string }) {
   const bottomRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  const { messages, sendMessage, status, error } = useChat({
-    transport: new DefaultChatTransport({ api: "/api/chat" }),
-    initialMessages: [
+  const welcomeMessage: UIMessage = {
+    id: "welcome",
+    role: "assistant",
+    parts: [
       {
-        id: "welcome",
-        role: "assistant",
-        parts: [
-          {
-            type: "text",
-            text: `Hey ${firstName}! I'm SELLR — your AI sales coach built for Whop.\n\nAsk me anything about your store, pricing, offers, or copy. Specific, real advice — no fluff.\n\nWhat's the biggest problem with your Whop store right now?`,
-          },
-        ],
+        type: "text",
+        text: `Hey ${firstName}! I'm SELLR — your AI sales coach built for Whop.\n\nAsk me anything about your store, pricing, offers, or copy. Specific, real advice — no fluff.\n\nWhat's the biggest problem with your Whop store right now?`,
       },
     ],
+  }
+
+  const { messages: chatMessages, sendMessage, status, error } = useChat({
+    transport: new DefaultChatTransport({ api: "/api/chat" }),
   })
+
+  // Combine welcome message with chat messages
+  const messages = [welcomeMessage, ...chatMessages]
 
   const isLoading = status === "streaming" || status === "submitted"
 
@@ -155,7 +157,7 @@ export default function Chat({ name }: { name: string }) {
         )}
 
         {/* Chips */}
-        {showChips && messages.length === 1 && (
+        {showChips && chatMessages.length === 0 && (
           <div className="flex flex-wrap gap-2 mt-2">
             {CHIPS.slice(0, 4).map((chip) => (
               <button
